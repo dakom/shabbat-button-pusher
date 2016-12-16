@@ -1,14 +1,23 @@
 #include <LiquidCrystal.h>
 #include <SPI.h>
 #include <SparkFunDS3234RTC.h>
+#include <Servo.h>
+/* GLOBALS
+ *  
+ */
 
 
 
-/*
-   GLOBALS and DEFINES
-*/
+#define PIN_MOTOR 3
+#define MOTOR_STATE_NEUTRAL 0
+#define MOTOR_STATE_START 1
+#define MOTOR_STATE_FORWARD 2
+#define MOTOR_STATE_REVERSE 3
+#define MOTOR_POSITION_ORIGIN 30
+#define MOTOR_POSITION_END 170
 
-//DISPLAY MENU
+#define PIN_CLOCK 10
+
 #define BTN_LEFT 'a'
 #define BTN_RIGHT 'd'
 #define BTN_UP 'w'
@@ -16,20 +25,80 @@
 #define BTN_ENTER 'f'
 #define BTN_NONE ' '
 
-LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
+#define PIN_LCD_1 8
+#define PIN_LCD_2 9
+#define PIN_LCD_3 4
+#define PIN_LCD_4 5
+#define PIN_LCD_5 6
+#define PIN_LCD_6 7
+
+LiquidCrystal lcd(PIN_LCD_1, PIN_LCD_2, PIN_LCD_3, PIN_LCD_4, PIN_LCD_5, PIN_LCD_6);
 
 unsigned char currentButton = 0;
 void (*currentMenu)() = NULL;
 int menuPos = 0;
 
-//CLOCK
-#define CLOCK_PIN 10
+typedef struct {
+  Servo servo;
+  uint8_t state;
+} MotorInfo;
+
+MotorInfo motors;
+
+
+
+/*
+ * MOTORS
+ */
+
+
+ void updateMotorState() {
+
+  switch (motors.state) {
+    //the hardcoded pos assignments should always be there inherently, it's just a sanity enforcement
+    case MOTOR_STATE_FORWARD:
+      motors.servo.write(MOTOR_POSITION_END);
+      motors.state = MOTOR_STATE_REVERSE;
+      break;
+
+    case MOTOR_STATE_REVERSE:
+      motors.servo.write(MOTOR_POSITION_ORIGIN);
+      motors.state = MOTOR_STATE_NEUTRAL;
+      showMenuDisplay("Finished :D");
+      currentMenu = &menuMain;
+      menuPos = 0;
+      
+      //motors.state = MOTOR_STATE_START;
+      break;
+    case MOTOR_STATE_START:
+        motors.servo.write(MOTOR_POSITION_ORIGIN);
+        motors.state = MOTOR_STATE_FORWARD;
+        break;
+  default:
+      //always return early if motor wasn't already running here...
+      return;
+  }
+
+  //give the servo time to settle into position
+  delay(2000);
+}
+ 
+void setupMotors() {
+  pinMode(PIN_MOTOR, OUTPUT);
+ 
+  motors.state = MOTOR_STATE_NEUTRAL;
+  motors.servo.attach(PIN_MOTOR); //controlling several in parallel off the same pin
+  motors.servo.write(MOTOR_POSITION_ORIGIN);
+}
+   
 /*
    CLOCK
 */
 
+
+
 void setupClock() {
-  rtc.begin(CLOCK_PIN);
+  rtc.begin(PIN_CLOCK);
   rtc.autoTime();
 }
 
@@ -82,9 +151,13 @@ int h = rtc.hour();
 /*
    MENU
 */
+
+
+
 void doManualPush() {
-  //placeholder
-  currentMenu = &menuMovingMotors; menuPos = 0;
+  motors.state = MOTOR_STATE_START;
+  currentMenu = NULL;
+  showMenuDisplayFull("PUSHING BUTTON!", "Please Wait...");
 }
 
 unsigned char GetKey(int value)
@@ -138,14 +211,6 @@ void menuDisplayTime() {
   }
 }
 
-void menuMovingMotors() {
-  showMenuDisplayFull("PUSHING BUTTON!", "Please Wait...");
-  //placeholder - should be automatic from motor
-  if (currentButton != BTN_NONE) {
-    currentMenu = &menuMain;
-  }
-}
-
 void menuWait() {
   showMenuDisplay("");
   //placeholder - should be automatic from motor
@@ -186,11 +251,14 @@ void menuMain() {
     }
   }
 }
-void updateButtonChoice() {
+void updateMenuDisplay() {
+
+  
+
+   if(currentMenu != NULL) {
   unsigned char btn = GetKey(analogRead(A0));
   if (btn != currentButton) {
     currentButton = btn;
-    if (currentMenu != NULL) {
       currentMenu();
     }
   }
@@ -215,11 +283,13 @@ void setup()
 
   setupLCD();
   setupClock();
+  setupMotors();
 }
 
 
 
 void loop()
 {
-  updateButtonChoice();
+  updateMenuDisplay();
+  updateMotorState();
 }
