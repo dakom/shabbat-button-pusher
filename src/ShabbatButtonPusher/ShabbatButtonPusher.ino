@@ -3,8 +3,8 @@
 #include <SparkFunDS3234RTC.h>
 #include <Servo.h>
 /* GLOBALS
- *  
- */
+
+*/
 
 
 
@@ -18,13 +18,6 @@
 
 #define PIN_CLOCK 10
 
-#define BTN_LEFT 'a'
-#define BTN_RIGHT 'd'
-#define BTN_UP 'w'
-#define BTN_DOWN 's'
-#define BTN_ENTER 'f'
-#define BTN_NONE ' '
-
 #define PIN_LCD_1 8
 #define PIN_LCD_2 9
 #define PIN_LCD_3 4
@@ -32,11 +25,22 @@
 #define PIN_LCD_5 6
 #define PIN_LCD_6 7
 
-LiquidCrystal lcd(PIN_LCD_1, PIN_LCD_2, PIN_LCD_3, PIN_LCD_4, PIN_LCD_5, PIN_LCD_6);
+#define PIN_DISPLAY_BUTTON A0
 
-unsigned char currentButton = 0;
-void (*currentMenu)() = NULL;
-int menuPos = 0;
+#define MENU_NONE 0
+#define MENU_MAIN_WAIT 1
+#define MENU_MAIN_PROCESS 2
+#define MENU_DISPLAY_TIME 3
+
+#define BTN_NONE 0
+#define BTN_LEFT 1
+#define BTN_RIGHT 2
+#define BTN_UP 3
+#define BTN_DOWN 4
+#define BTN_ENTER 5
+
+
+LiquidCrystal lcd(PIN_LCD_1, PIN_LCD_2, PIN_LCD_3, PIN_LCD_4, PIN_LCD_5, PIN_LCD_6);
 
 typedef struct {
   Servo servo;
@@ -45,14 +49,35 @@ typedef struct {
 
 MotorInfo motors;
 
+typedef struct {
+  int type;
+  void (*process)();
+  int choice;
+  int button;
+} MenuInfo;
 
+MenuInfo menu;
+
+
+/* UTILITIES
+
+*/
+
+void debugPrint(char *fmt, ... ) {
+  char buf[128]; // resulting string limited to 128 chars
+  va_list args;
+  va_start (args, fmt );
+  vsnprintf(buf, 128, fmt, args);
+  va_end (args);
+  Serial.print(buf);
+}
 
 /*
- * MOTORS
- */
+   MOTORS
+*/
 
 
- void updateMotorState() {
+void updateMotorState() {
 
   switch (motors.state) {
     //the hardcoded pos assignments should always be there inherently, it's just a sanity enforcement
@@ -64,17 +89,15 @@ MotorInfo motors;
     case MOTOR_STATE_REVERSE:
       motors.servo.write(MOTOR_POSITION_ORIGIN);
       motors.state = MOTOR_STATE_NEUTRAL;
-      showMenuDisplay("Finished :D");
-      currentMenu = &menuMain;
-      menuPos = 0;
-      
+      assignMenu(MENU_MAIN_WAIT);
+      //loop forever - for testing
       //motors.state = MOTOR_STATE_START;
       break;
     case MOTOR_STATE_START:
-        motors.servo.write(MOTOR_POSITION_ORIGIN);
-        motors.state = MOTOR_STATE_FORWARD;
-        break;
-  default:
+      motors.servo.write(MOTOR_POSITION_ORIGIN);
+      motors.state = MOTOR_STATE_FORWARD;
+      break;
+    default:
       //always return early if motor wasn't already running here...
       return;
   }
@@ -82,15 +105,15 @@ MotorInfo motors;
   //give the servo time to settle into position
   delay(2000);
 }
- 
+
 void setupMotors() {
   pinMode(PIN_MOTOR, OUTPUT);
- 
+
   motors.state = MOTOR_STATE_NEUTRAL;
   motors.servo.attach(PIN_MOTOR); //controlling several in parallel off the same pin
   motors.servo.write(MOTOR_POSITION_ORIGIN);
 }
-   
+
 /*
    CLOCK
 */
@@ -105,60 +128,52 @@ void setupClock() {
 //=====================================
 String ReadDate() {
   String temp;
-  
+
   rtc.update(); // Update RTC data
 
 
-// Read the day/date:
-int dy = rtc.day();
-int da = rtc.date();
-int mo = rtc.month();
-int yr = rtc.year();
+  // Read the day/date:
+  int dy = rtc.day();
+  int da = rtc.date();
+  int mo = rtc.month();
+  int yr = rtc.year();
 
-String dayString = rtc.dayStr();
+  String dayString = rtc.dayStr();
 
   temp.concat(dayString);
-  
+
   temp.concat(" ") ;
   temp.concat(da);
   temp.concat("/");
   temp.concat(mo);
   temp.concat("/") ;
-   temp.concat(yr);
- 
-  
+  temp.concat(yr);
+
+
   return (temp);
 }
 
 String ReadTime() {
   String temp;
-  
+
   rtc.update(); // Update RTC data
 
   // Read the time:
-int s = rtc.second();
-int m = rtc.minute();
-int h = rtc.hour();
+  int s = rtc.second();
+  int m = rtc.minute();
+  int h = rtc.hour();
   temp.concat(h);
   temp.concat(":") ;
   temp.concat(m);
   temp.concat(":") ;
   temp.concat(s);
-  
+
   return (temp);
 }
 
 /*
    MENU
 */
-
-
-
-void doManualPush() {
-  motors.state = MOTOR_STATE_START;
-  currentMenu = NULL;
-  showMenuDisplayFull("PUSHING BUTTON!", "Please Wait...");
-}
 
 unsigned char GetKey(int value)
 {
@@ -177,7 +192,7 @@ unsigned char GetKey(int value)
   return BTN_NONE;
 }
 
-void showMenuDisplayFull(String textToDisplayTop, String textToDisplayBottom) {
+void showMenuDisplay(String textToDisplayTop, String textToDisplayBottom) {
   lcd.clear();
   if (textToDisplayTop != "") {
     lcd.setCursor(0, 0);
@@ -189,89 +204,102 @@ void showMenuDisplayFull(String textToDisplayTop, String textToDisplayBottom) {
   }
 }
 
-void showMenuDisplay(String textToDisplay) {
-  showMenuDisplayFull("Good Shabbos!", textToDisplay);
+void mainMenuProcess() {
+
+  if (menu.button == BTN_ENTER) {
+    switch (menu.choice) {
+      case 0:   motors.state = MOTOR_STATE_START;
+        assignMenu(MENU_NONE);
+        showMenuDisplay("PUSHING BUTTON!", "Please Wait...");
+        break;
+
+      case 1:
+        assignMenu(MENU_DISPLAY_TIME);
+        break;
+
+      case 2: //set time
+        break;
+      case 3: //set alarm 1
+        break;
+      case 4:
+        //set alarm 2
+        break;
+      case 5: assignMenu(MENU_MAIN_WAIT); break;
+    }
+  } else {
+
+    if (menu.button == BTN_LEFT && menu.choice > 0) {
+      menu.choice--;
+    } else if (menu.button == BTN_RIGHT && menu.choice < 6) {
+      menu.choice++;
+    }
+
+    switch (menu.choice) {
+      case 0: showMenuDisplay("START MOTOR NOW", ""); break;
+      case 1: showMenuDisplay("DISPLAY TIME", ""); break;
+      case 2: showMenuDisplay("SET TIME", ""); break;
+      case 3: showMenuDisplay("SET ALARM 1", ""); break;
+      case 4: showMenuDisplay("SET ALARM 2", ""); break;
+      case 5: showMenuDisplay("Exit", ""); break;
+    }
+
+  }
 }
 
-void menuShowInfo() {
-  switch (currentButton) {
-    case BTN_LEFT: showMenuDisplay("LEFT"); break;
-    case BTN_RIGHT: showMenuDisplay("RIGHT"); break;
-    case BTN_UP: showMenuDisplay("UP"); break;
-    case BTN_DOWN: showMenuDisplay("DOWN"); break;
-    case BTN_ENTER: showMenuDisplay("ENTER"); break;
-    default: showMenuDisplay(""); break;
+void mainMenuWait() {
+  showMenuDisplay("Good Shabbos!", "");
+  if (menu.button != BTN_NONE) {
+    assignMenu(MENU_MAIN_PROCESS);
   }
 }
 
 void menuDisplayTime() {
-  showMenuDisplayFull(ReadDate(), ReadTime());
-  if (currentButton != BTN_NONE) {
-    currentMenu = &menuMain;
+  showMenuDisplay(ReadDate(), ReadTime());
+  if (menu.button != BTN_NONE) {
+    assignMenu(MENU_MAIN_WAIT);
   }
 }
 
-void menuWait() {
-  showMenuDisplay("");
-  //placeholder - should be automatic from motor
-  if (currentButton != BTN_NONE) {
-    currentMenu = &menuMain;
+void assignMenu(int menuType) {
+
+  menu.type = menuType;
+  menu.choice = 0;
+
+  switch (menu.type) {
+    case MENU_MAIN_WAIT:
+      menu.process = &mainMenuWait;
+      break;
+    case MENU_MAIN_PROCESS:
+      menu.process = &mainMenuProcess;
+      break;
+    case MENU_DISPLAY_TIME:
+
+      menu.process = &menuDisplayTime;
+      break;
+    default:
+      //if no valid menu, leave early
+      return;
   }
 }
 
-void menuMain() {
-
-  if (currentButton == BTN_LEFT) {
-    menuPos--;
-  } else if (currentButton == BTN_RIGHT) {
-    menuPos++;
-  }
-  if (menuPos < 0) {
-    menuPos = 0;
-  }
-  if (menuPos > 4) {
-    menuPos = 4;
-  }
-  switch (menuPos) {
-    case 0: showMenuDisplay("MANUAL PUSH"); break;
-    case 1: showMenuDisplay("DISPLAY TIME"); break;
-    case 2: showMenuDisplay("ADD ROBOT"); break;
-    case 3: showMenuDisplay("SHOW ROBOTS"); break;
-    case 4: showMenuDisplay("DELETE ROBOT"); break;
-    default: showMenuDisplay(""); break;
-  }
-
-  if (currentButton == BTN_ENTER) {
-    switch (menuPos) {
-      case 0: doManualPush(); break;
-      case 1: currentMenu = &menuDisplayTime; menuPos = 0; break;
-      case 2: showMenuDisplay("ADD ROBOT"); break;
-      case 3: showMenuDisplay("SHOW ROBOTS"); break;
-      case 4: showMenuDisplay("DELETE ROBOT"); break;
-    }
-  }
-}
-void updateMenuDisplay() {
-
-  
-
-   if(currentMenu != NULL) {
-  unsigned char btn = GetKey(analogRead(A0));
-  if (btn != currentButton) {
-    currentButton = btn;
-      currentMenu();
+void checkForMenuButtonInput() {
+  //as of right now - there's no need to read the button if there's no menu assigned
+  if (menu.type != MENU_NONE) {
+    unsigned char button = GetKey(analogRead(PIN_DISPLAY_BUTTON));
+    if (button != menu.button) {
+      menu.button = button;
+      menu.process();
     }
   }
 
 }
 
-void setupLCD() {
+void setupMenuDisplay() {
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
 
-
-  //currentMenu = &menuWait;
-  currentMenu = &menuDisplayTime;
+  assignMenu(MENU_MAIN_WAIT);
+  menu.button = -1; //force first menu to display
 }
 
 /*
@@ -281,7 +309,7 @@ void setup()
 {
   Serial.begin(9600);
 
-  setupLCD();
+  setupMenuDisplay();
   setupClock();
   setupMotors();
 }
@@ -290,6 +318,6 @@ void setup()
 
 void loop()
 {
-  updateMenuDisplay();
+  checkForMenuButtonInput();
   updateMotorState();
 }
