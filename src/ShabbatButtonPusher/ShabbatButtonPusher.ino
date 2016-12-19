@@ -28,9 +28,11 @@
 #define PIN_DISPLAY_BUTTON A0
 
 #define MENU_NONE 0
-#define MENU_MAIN_WAIT 1
+#define MENU_START 1
 #define MENU_MAIN_PROCESS 2
 #define MENU_DISPLAY_TIME 3
+#define MENU_SET_TIME 4
+#define MENU_SET_TIME_SUB 5
 
 #define BTN_NONE 0
 #define BTN_LEFT 1
@@ -39,6 +41,13 @@
 #define BTN_DOWN 4
 #define BTN_ENTER 5
 
+#define TIME_DAY 0
+#define TIME_DATE 1
+#define TIME_MONTH 2
+#define TIME_YEAR 3
+#define TIME_SECOND 4
+#define TIME_MINUTE 5
+#define TIME_HOUR 6
 
 LiquidCrystal lcd(PIN_LCD_1, PIN_LCD_2, PIN_LCD_3, PIN_LCD_4, PIN_LCD_5, PIN_LCD_6);
 
@@ -53,23 +62,27 @@ typedef struct {
   int type;
   void (*process)();
   int choice;
+  int subchoice;
   int button;
 } MenuInfo;
 
 MenuInfo menu;
 
-
+int timeInfo[6];
 /* UTILITIES
 
 */
 
-void debugPrint(char *fmt, ... ) {
+void log(char *fmt, ... ) {
+  
   char buf[128]; // resulting string limited to 128 chars
   va_list args;
   va_start (args, fmt );
   vsnprintf(buf, 128, fmt, args);
   va_end (args);
+  
   Serial.print(buf);
+  Serial.print('\n');
 }
 
 /*
@@ -89,7 +102,7 @@ void updateMotorState() {
     case MOTOR_STATE_REVERSE:
       motors.servo.write(MOTOR_POSITION_ORIGIN);
       motors.state = MOTOR_STATE_NEUTRAL;
-      assignMenu(MENU_MAIN_WAIT);
+      assignMenu(MENU_START);
       //loop forever - for testing
       //motors.state = MOTOR_STATE_START;
       break;
@@ -125,48 +138,43 @@ void setupClock() {
   rtc.autoTime();
 }
 
+void setToCurrentTime() {
+  rtc.update();
+
+  timeInfo[TIME_DAY] = rtc.day();
+  timeInfo[TIME_DATE] = rtc.date();
+  timeInfo[TIME_MONTH] = rtc.month();
+  timeInfo[TIME_YEAR] = rtc.year();
+  timeInfo[TIME_SECOND] = rtc.second();
+  timeInfo[TIME_MINUTE] = rtc.minute();
+  timeInfo[TIME_HOUR] = rtc.hour();
+}
+
 //=====================================
-String ReadDate() {
+String GetCurrentDateString() {
   String temp;
 
-  rtc.update(); // Update RTC data
-
-
   // Read the day/date:
-  int dy = rtc.day();
-  int da = rtc.date();
-  int mo = rtc.month();
-  int yr = rtc.year();
-
-  String dayString = rtc.dayStr();
-
-  temp.concat(dayString);
+  // temp.concat(timeInfo->dayStr);
 
   temp.concat(" ") ;
-  temp.concat(da);
+  temp.concat(timeInfo[TIME_DATE]);
   temp.concat("/");
-  temp.concat(mo);
+  temp.concat(timeInfo[TIME_MONTH]);
   temp.concat("/") ;
-  temp.concat(yr);
-
+  temp.concat(timeInfo[TIME_YEAR]);
 
   return (temp);
 }
 
-String ReadTime() {
+String GetCurrentTimeString() {
   String temp;
-
-  rtc.update(); // Update RTC data
-
   // Read the time:
-  int s = rtc.second();
-  int m = rtc.minute();
-  int h = rtc.hour();
-  temp.concat(h);
+  temp.concat(timeInfo[TIME_HOUR]);
   temp.concat(":") ;
-  temp.concat(m);
+  temp.concat(timeInfo[TIME_MINUTE]);
   temp.concat(":") ;
-  temp.concat(s);
+  temp.concat(timeInfo[TIME_SECOND]);
 
   return (temp);
 }
@@ -175,21 +183,26 @@ String ReadTime() {
    MENU
 */
 
-unsigned char GetKey(int value)
+int GetKey(int value)
 {
-  if (value >= 850 && value <= 860) {
-    return BTN_LEFT;
-  } else if (value >= 810 && value <= 820) {
-    return BTN_RIGHT;
-  } else if (value >= 925 && value <= 935) {
-    return BTN_UP;
-  } else if (value >= 900 && value <= 910) {
-    return BTN_DOWN;
-  } else if (value >= 610 && value <= 620) {
-    return BTN_ENTER;
+
+  int btn = BTN_NONE;
+
+  if (value > 600 && value < 1000) {
+    if (value < 650) {
+      btn = BTN_ENTER;
+    } else if (value < 840) {
+      btn = BTN_RIGHT;
+    } else if (value < 890) {
+      btn = BTN_LEFT;
+    } else if (value < 920) {
+      btn = BTN_DOWN;
+    } else if (value < 950) {
+      btn = BTN_UP;
+    }
   }
 
-  return BTN_NONE;
+  return btn;
 }
 
 void showMenuDisplay(String textToDisplayTop, String textToDisplayBottom) {
@@ -218,19 +231,20 @@ void mainMenuProcess() {
         break;
 
       case 2: //set time
+        assignMenu(MENU_SET_TIME);
         break;
       case 3: //set alarm 1
         break;
       case 4:
         //set alarm 2
         break;
-      case 5: assignMenu(MENU_MAIN_WAIT); break;
+      case 5: assignMenu(MENU_START); break;
     }
   } else {
 
     if (menu.button == BTN_LEFT && menu.choice > 0) {
       menu.choice--;
-    } else if (menu.button == BTN_RIGHT && menu.choice < 6) {
+    } else if (menu.button == BTN_RIGHT && menu.choice < 5) {
       menu.choice++;
     }
 
@@ -246,7 +260,7 @@ void mainMenuProcess() {
   }
 }
 
-void mainMenuWait() {
+void mainMenuStart() {
   showMenuDisplay("Good Shabbos!", "");
   if (menu.button != BTN_NONE) {
     assignMenu(MENU_MAIN_PROCESS);
@@ -254,20 +268,140 @@ void mainMenuWait() {
 }
 
 void menuDisplayTime() {
-  showMenuDisplay(ReadDate(), ReadTime());
+  
+  setToCurrentTime();
+
+  showMenuDisplay(GetCurrentDateString(), GetCurrentTimeString());
   if (menu.button != BTN_NONE) {
-    assignMenu(MENU_MAIN_WAIT);
+    assignMenu(MENU_START);
+  }
+}
+
+String menuTimeToString(int choice) {
+  switch (choice) {
+    case 0: return "Day of Week";
+    case 1: return "Day of Month";
+    case 2: return "Month";
+    case 3: return "Year";
+    case 4: return "Hour";
+    case 5: return "Minute";
+    case 6: return "Second";
+  }
+
+  return "CANCEL";
+}
+
+void menuSetTimeInit() {
+  
+  setToCurrentTime();
+
+  
+  if (menu.button == BTN_ENTER) {
+    
+    if (menu.choice == 7) {
+      assignMenu(MENU_START);
+
+    } else {
+
+      
+      int choice = menu.choice;
+      assignMenu(MENU_SET_TIME_SUB);
+      menu.choice = choice;
+    }
+
+  } else {
+    if (menu.button == BTN_LEFT && menu.choice > 0) {
+      menu.choice--;
+    } else if (menu.button == BTN_RIGHT && menu.choice < 7) {
+      menu.choice++;
+    }
+    
+    String bottomText;
+    if(menu.choice < 7) {
+      bottomText.concat(timeInfo[menu.choice]);
+    }
+    showMenuDisplay(menuTimeToString(menu.choice), bottomText);
+  }
+
+}
+
+void menuSetTimeSub() {
+  int val = timeInfo[menu.choice];
+  setToCurrentTime();
+  timeInfo[menu.choice] = val;
+   
+  if (menu.button == BTN_ENTER) {
+    if (menu.subchoice != 1) {
+      //TODO: SET TIME!
+    }
+    //log("HAPPENED IN SUB!");
+     assignMenu(MENU_START);
+
+  } else {
+
+    if (menu.button == BTN_LEFT && menu.subchoice == 1) {
+      menu.subchoice--;
+    } else if (menu.button == BTN_RIGHT && menu.subchoice == 0) {
+      menu.subchoice++;
+    }
+
+    String topText;
+    String bottomText;
+
+    if (menu.subchoice == 1) {
+      showMenuDisplay("CANCEL", "");
+    } else {
+
+
+      int upperLimit = -1;
+
+      switch (menu.choice) {
+        case 0:
+          upperLimit = 7;
+          break;
+        case 1:
+          upperLimit = 31;
+          break;
+        case 2:
+          upperLimit = 12;
+          break;
+        case 3:
+          break;
+        case 4:
+          upperLimit = 24;
+          break;
+        case 5:
+          upperLimit = 60;
+          break;
+        case 6:
+          upperLimit = 60;
+          break;
+      }
+
+
+      if (menu.button == BTN_UP && (upperLimit == -1 || timeInfo[menu.choice] < upperLimit)) {
+        timeInfo[menu.choice]++;
+      } else if (menu.button == BTN_DOWN && timeInfo[menu.choice] > 0) {
+        timeInfo[menu.choice]--;
+      }
+
+      topText.concat(timeInfo[menu.choice]);
+      bottomText = "Set " + menuTimeToString(menu.choice);
+
+      showMenuDisplay(topText, bottomText);
+    }
+
   }
 }
 
 void assignMenu(int menuType) {
-
+  log("Assigning menu to %d", menuType);
   menu.type = menuType;
   menu.choice = 0;
-
+  menu.subchoice = 0;
   switch (menu.type) {
-    case MENU_MAIN_WAIT:
-      menu.process = &mainMenuWait;
+    case MENU_START:
+      menu.process = &mainMenuStart;
       break;
     case MENU_MAIN_PROCESS:
       menu.process = &mainMenuProcess;
@@ -275,6 +409,12 @@ void assignMenu(int menuType) {
     case MENU_DISPLAY_TIME:
 
       menu.process = &menuDisplayTime;
+      break;
+    case MENU_SET_TIME:
+      menu.process = &menuSetTimeInit;
+      break;
+    case MENU_SET_TIME_SUB:
+      menu.process = &menuSetTimeSub;
       break;
     default:
       //if no valid menu, leave early
@@ -287,6 +427,7 @@ void checkForMenuButtonInput() {
   if (menu.type != MENU_NONE) {
     unsigned char button = GetKey(analogRead(PIN_DISPLAY_BUTTON));
     if (button != menu.button) {
+      log("BUTTON: %d MENU: %d", button, menu.type);
       menu.button = button;
       menu.process();
     }
@@ -298,7 +439,7 @@ void setupMenuDisplay() {
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
 
-  assignMenu(MENU_MAIN_WAIT);
+  assignMenu(MENU_START);
   menu.button = -1; //force first menu to display
 }
 

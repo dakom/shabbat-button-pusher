@@ -2,7 +2,6 @@
 
 ## TODO:
 
-* Left button is going to first item in main menu
 * Set Time
 * Set Alarm
 * Test Alarm functionality
