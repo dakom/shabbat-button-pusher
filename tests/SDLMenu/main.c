@@ -23,6 +23,8 @@ SDL_Rect fontRect;
 //input
 SDL_Event Event;
 
+
+
 void freeSDL()
 {
 
@@ -111,10 +113,17 @@ void showText(char *fmt, ...)
 int main(int argc, char *args[])
 {
     //Start up SDL and create window
-    
+
     if (!init())
     {
-        fprintf(stderr, "Failed to initialize!\n");
+        fprintf(stderr, "Failed to initialize SDL!\n");
+        //Failure here makes everything pointless, so exit early
+        return 1;
+    }
+
+    
+    if(!setupMenus()) {
+        fprintf(stderr, "Failed to initialize Menus!\n");
         //Failure here makes everything pointless, so exit early
         return 1;
     }
@@ -123,7 +132,8 @@ int main(int argc, char *args[])
     fontInit();
 
     //start!
-    showText("Press a key..");
+     assignMenu(rootMenu);
+     updateButtonPress(BTN_NONE);
 
     /*
      * Just keep looping and processing keys.
@@ -152,6 +162,7 @@ int main(int argc, char *args[])
             case SDL_QUIT:
                 isLooping = false;
             default:
+                updateButtonPress(BTN_NONE);
                 break;
             }
         }
@@ -160,6 +171,7 @@ int main(int argc, char *args[])
     }
 
     freeSDL();
+    freeMenus();
 
     return 0;
 }

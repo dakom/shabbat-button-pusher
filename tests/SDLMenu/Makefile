@@ -1,5 +1,5 @@
 #OBJS specifies which files to compile as part of the project
-OBJS = main.c menu.c
+OBJS = main.c menu.c activeMenus.c
 
 #CC specifies which compiler we're using
 CC = g++
@@ -13,9 +13,14 @@ LIBRARY_PATHS = -Lthirdparty/sdl/lib -Lthirdparty/sdl_ttf/lib
 #COMPILER_FLAGS specifies the additional compilation options we're using
 # -w suppresses all warnings
 # -Wl,-subsystem,windows gets rid of the console window
-COMPILER_FLAGS = -w -Wl,-subsystem,windows
+# -g debugging
+#COMPILER_FLAGS = -w -Wl,-subsystem,windows
+
+#debugging
+COMPILER_FLAGS = -w -g
 
 #LINKER_FLAGS specifies the libraries we're linking against
+# -g debugging
 LINKER_FLAGS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_ttf
 
 #OBJ_NAME specifies the name of our exectuable
