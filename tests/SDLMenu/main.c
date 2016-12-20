@@ -1,26 +1,13 @@
-/*This source code copyrighted by Lazy Foo' Productions (2004-2015)
-and may not be redistributed without written permission.*/
-
-//Using SDL and standard IO
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include "menu.h"
 
-
-//Screen dimension constants
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
-//Starts up SDL and creates window
 bool init();
-
-//Loads media
-bool loadMedia();
-
-//Frees media and shuts down SDL
-void close();
 
 //The window we'll be rendering to
 SDL_Window *gWindow = NULL;
@@ -36,6 +23,17 @@ SDL_Rect fontRect;
 //input
 SDL_Event Event;
 
+void freeSDL()
+{
+
+    //Destroy window
+    SDL_DestroyWindow(gWindow);
+    gWindow = NULL;
+
+    //Quit SDL subsystems
+    SDL_Quit();
+}
+
 bool init()
 {
     //Initialization flag
@@ -44,16 +42,16 @@ bool init()
     //Initialize SDL
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
-        printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+        fprintf(stderr, "SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
         success = false;
     }
     else
     {
         //Create window
-        gWindow = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+        gWindow = SDL_CreateWindow("LCD Emulator", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
         if (gWindow == NULL)
         {
-            printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
+            fprintf(stderr, "Window could not be created! SDL_Error: %s\n", SDL_GetError());
             success = false;
         }
         else
@@ -61,6 +59,11 @@ bool init()
             //Get window surface
             gScreenSurface = SDL_GetWindowSurface(gWindow);
         }
+    }
+
+    if (!success)
+    {
+        freeSDL();
     }
 
     return success;
@@ -91,7 +94,7 @@ void showTextAtLocation(char *c, int x, int y)
     //free it
     SDL_FreeSurface(gTextSurface);
 
-    //update current screen    
+    //update current screen
     SDL_UpdateWindowSurface(gWindow);
 }
 
@@ -105,65 +108,58 @@ void showText(char *fmt, ...)
     showTextAtLocation(buf, gScreenSurface->w / 2 - 11 * 3, gScreenSurface->h / 2);
 }
 
-void close()
-{
-
-    //Destroy window
-    SDL_DestroyWindow(gWindow);
-    gWindow = NULL;
-
-    //Quit SDL subsystems
-    SDL_Quit();
-}
-
-int getButton() {
-
-}
 int main(int argc, char *args[])
 {
     //Start up SDL and create window
+    
     if (!init())
     {
-        printf("Failed to initialize!\n");
+        fprintf(stderr, "Failed to initialize!\n");
+        //Failure here makes everything pointless, so exit early
         return 1;
     }
-    else
+    
+    //Load fonts... should probably error check but w/e
+    fontInit();
+
+    //start!
+    showText("Press a key..");
+
+    /*
+     * Just keep looping and processing keys.
+     * The SDL/Display part is just meant to emulate the LCD and buttons
+     * Only special case is Escape... otherwise, just pass the button event
+     */
+
+    bool isLooping = true;
+    while (isLooping)
     {
-        //Initialize fonts
-        fontInit();
-
-        showText("Press a key..");
-
-        bool isLooping = true;
-        while(isLooping) {
         while (SDL_PollEvent(&Event))
+        {
+            switch (Event.type)
             {
-                switch (Event.type)
+
+            case SDL_KEYDOWN:
+                if (Event.key.keysym.sym == SDLK_ESCAPE)
                 {
-                
-
-                case SDL_KEYDOWN:
-                    if(Event.key.keysym.sym == SDLK_ESCAPE) {
-                        isLooping = false;
-                    } else {
-                        updateButtonPress(Event.key.keysym.sym);
-                    }
-                    break;
-                case SDL_QUIT:
                     isLooping = false;
-                default:
-                    break;
                 }
+                else
+                {
+                    updateButtonPress(Event.key.keysym.sym);
+                }
+                break;
+            case SDL_QUIT:
+                isLooping = false;
+            default:
+                break;
             }
-
-            SDL_Delay(10);
         }
-        
-        
+
+        SDL_Delay(10);
     }
 
-    //Free resources and close SDL
-    close();
+    freeSDL();
 
     return 0;
 }
