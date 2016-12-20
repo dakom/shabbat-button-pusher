@@ -1,0 +1,4 @@
+thirdparty/
+*.dll
+*.exe
+sdl2-config
