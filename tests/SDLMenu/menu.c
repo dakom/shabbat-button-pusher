@@ -3,6 +3,7 @@
 #include "menu.h"
 #include "activeMenus.h"
 
+MenuInfo menus[NUMBER_OF_MENUS];
 int currentButton = BTN_NONE-1; //impossible value
 MenuInfo *currentMenu = NULL;
 MenuInfo *rootMenu = NULL;
@@ -143,15 +144,10 @@ void assignMenu(MenuInfo *menu)
   currentMenu->verticalIndex = 0;
 }
 
-MenuInfo *createMenu(MenuInfo *parent, void (*showDisplay)(), void (*processButton)())
+MenuInfo *createMenu(MenuInfo *parent, int index, void (*showDisplay)(), void (*processButton)())
 {
 
-  MenuInfo *menu = (MenuInfo *)malloc(sizeof(MenuInfo));
-
-  if (menu == NULL)
-  {
-    return NULL;
-  }
+  MenuInfo *menu = &menus[index];
 
   menu->prevSibling = menu->nextSibling = menu->parent = menu->firstChild = NULL;
   menu->showDisplay = showDisplay;
@@ -159,7 +155,7 @@ MenuInfo *createMenu(MenuInfo *parent, void (*showDisplay)(), void (*processButt
   menu->horizontalIndex = 0;
   menu->verticalIndex = 0;
   menu->maxChildIndex = -1;
- menu->hasSetMaxChildren = false;
+  menu->hasSetMaxChildren = false;
 
   if (parent != NULL)
   {
@@ -182,48 +178,4 @@ MenuInfo *createMenu(MenuInfo *parent, void (*showDisplay)(), void (*processButt
   }
 
   return menu;
-}
-
-bool setupMenus()
-{
-  MenuInfo *menu;
-
-  menu = createMenu(NULL, NULL, NULL);
-  if (menu == NULL)
-  {
-    return false;
-  }
-  rootMenu = menu;
-
-  menu = createMenu(menu, &mainMenuShowDisplay, &mainMenuProcessButton);
-  if (menu == NULL)
-  {
-    return false;
-  }
-
-  menu = createMenu(menu, &child1ShowDisplay, NULL);
-  if (menu == NULL)
-  {
-    return false;
-  }
-
-  menu = createMenu(menu->parent, &child2ShowDisplay, NULL);
-  if (menu == NULL)
-  {
-    return false;
-  }
-
-   menu = createMenu(menu->parent, &child3ShowDisplay, &child3ProcessButton);
-  if (menu == NULL)
-  {
-    return false;
-  }
-
-  return true;
-}
-
-void freeMenus()
-{
-  //need to walk the list from the root and free it!
-  //Though for our purposes, on Arduino, not really :P
 }

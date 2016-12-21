@@ -15,27 +15,52 @@ void mainMenuProcessButton()
   }
 }
 
-void child1ShowDisplay()
+void mainChildStartMotorDisplay()
 {
-  showText("Child 1");
+  showText("Start Motor Now");
 }
 
 
-void child2ShowDisplay()
+void mainChildDisplayTimeDisplay()
 {
-  showText("Child 2");
+  showText("Display Time");
+}
+
+void mainChildSetTimeDisplay()
+{
+  showText("Set Time");
+}
+
+void mainChildSetAlarmDisplay()
+{
+  showText("Set Alarm");
 }
 
 
-void child3ShowDisplay()
+
+
+void displayTimeChildDisplay()
+{
+  showText("Current Time!");
+}
+
+void genericCancelDisplay()
 {
   showText("CANCEL");
 }
 
-void child3ProcessButton()
+void genericCancelProcessButton()
 {
   if (currentButton == BTN_ENTER)
   {
-      assignMenu(rootMenu);
+      assignMenu(&menus[0]);
+  }
+}
+
+void genericAcceptChildProcessButton()
+{
+  if (currentButton == BTN_ENTER)
+  {
+      assignMenu(getSelectedChild());
   }
 }

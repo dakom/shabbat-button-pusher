@@ -1,5 +1,7 @@
 #include <SDL.h>
 
+#define NUMBER_OF_MENUS 20 // change this number to real amount for optimization
+
 #define BTN_NONE -1
 #define BTN_UP SDLK_UP
 #define BTN_LEFT SDLK_LEFT
@@ -17,14 +19,13 @@ typedef struct MenuInfo{
 
 extern int currentButton;
 extern MenuInfo *currentMenu;
-extern MenuInfo *rootMenu;
+extern MenuInfo menus[];
 
 int getMaxChildIndex(MenuInfo *);
 MenuInfo *getSelectedChild();
-
+MenuInfo *createMenu(MenuInfo *, int, void (*)(), void (*)());
 void assignMenu(MenuInfo *);
-bool setupMenus();
-void freeMenus();
+void setupMenus();
 void updateButtonPress(int);
 void showText(char *, ...);
 char *buttonToString(int);

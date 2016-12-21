@@ -4,6 +4,8 @@
 #include <stdarg.h>
 #include "menu.h"
 
+#define FONT_SIZE 24
+
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 
@@ -75,22 +77,22 @@ bool init()
 void fontInit()
 {
     TTF_Init();
-    font = TTF_OpenFont("Tahoma.ttf", 18);
+    font = TTF_OpenFont("Tahoma.ttf", FONT_SIZE);
     fColor.r = 255;
     fColor.g = 255;
     fColor.b = 255;
 }
 
-//Print the designated string at the specified coordinates
-void showTextAtLocation(char *c, int x, int y)
+void showTextAtCenter(char *c)
 {
     //clear current Screen
     SDL_FillRect(gScreenSurface, NULL, 0x000000);
 
     //create text surface
     SDL_Surface *gTextSurface = TTF_RenderText_Solid(font, c, fColor);
-    fontRect.x = x;
-    fontRect.y = y;
+    fontRect.x = (gScreenSurface->w - gTextSurface->w)/2;
+    fontRect.y = (gScreenSurface->h - gTextSurface->h)/2;
+
     //blit it
     SDL_BlitSurface(gTextSurface, NULL, gScreenSurface, &fontRect);
     //free it
@@ -107,7 +109,7 @@ void showText(char *fmt, ...)
     va_start(args, fmt);
     vsnprintf(buf, 128, fmt, args);
     va_end(args);
-    showTextAtLocation(buf, gScreenSurface->w / 2 - 11 * 3, gScreenSurface->h / 2);
+    showTextAtCenter(buf);
 }
 
 int main(int argc, char *args[])
@@ -122,17 +124,13 @@ int main(int argc, char *args[])
     }
 
     
-    if(!setupMenus()) {
-        fprintf(stderr, "Failed to initialize Menus!\n");
-        //Failure here makes everything pointless, so exit early
-        return 1;
-    }
+    setupMenus();
     
     //Load fonts... should probably error check but w/e
     fontInit();
 
     //start!
-     assignMenu(rootMenu);
+     
      updateButtonPress(BTN_NONE);
 
     /*
@@ -171,7 +169,6 @@ int main(int argc, char *args[])
     }
 
     freeSDL();
-    freeMenus();
 
     return 0;
 }
