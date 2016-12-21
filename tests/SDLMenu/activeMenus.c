@@ -11,7 +11,7 @@ void mainMenuProcessButton()
 {
   if (currentButton != BTN_NONE)
   {
-      assignMenu(getSelectedChild());
+      chooseMenu(getSelectedChild());
   }
 }
 
@@ -53,7 +53,7 @@ void genericCancelProcessButton()
 {
   if (currentButton == BTN_ENTER)
   {
-      assignMenu(&menus[0]);
+      chooseMenu(&menus[0]);
   }
 }
 
@@ -61,6 +61,6 @@ void genericAcceptChildProcessButton()
 {
   if (currentButton == BTN_ENTER)
   {
-      assignMenu(getSelectedChild());
+      chooseMenu(getSelectedChild());
   }
 }

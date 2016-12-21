@@ -13,7 +13,6 @@ typedef struct MenuInfo{
   void (*showDisplay)();
   void (*processButton)();
   int horizontalIndex, verticalIndex, maxChildIndex;
-  bool hasSetMaxChildren;
   struct MenuInfo *prevSibling, *nextSibling, *parent, *firstChild;
 };
 
@@ -24,7 +23,7 @@ extern MenuInfo menus[];
 int getMaxChildIndex(MenuInfo *);
 MenuInfo *getSelectedChild();
 MenuInfo *createMenu(MenuInfo *, int, void (*)(), void (*)());
-void assignMenu(MenuInfo *);
+void chooseMenu(MenuInfo *);
 void setupMenus();
 void updateButtonPress(int);
 void showText(char *, ...);

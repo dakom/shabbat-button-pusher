@@ -24,7 +24,7 @@ void setupMenus()
       createMenu(parent, index++, &mainChildSetAlarmDisplay, NULL);
       createMenu(parent, index++, &genericCancelDisplay, &genericCancelProcessButton);
 
-  assignMenu(&menus[0]);
+  chooseMenu(&menus[0]);
 
   printf("%d menus created, %d wasted in NUMBER_OF_MENUS static allocation :P\n", index, NUMBER_OF_MENUS - index);
 }
