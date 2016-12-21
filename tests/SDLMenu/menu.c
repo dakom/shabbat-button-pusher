@@ -29,6 +29,14 @@ void updateButtonPress(int btn)
     }
     else
     {
+      /*
+       * Yeah, it's kinda ugly, but it works :)
+       * Basic idea is that we are really always showing and processing the active child (hence root node is meaningless)
+       * If there is no child then we show the current
+       * Since child is always determined by horizontalIndex, we can do sanity checks globally here
+       * Though verticalIndex upper limit should be handled by each menu itself (bottom limit is always 0)
+       */
+
       if(currentMenu->hasSetMaxChildren == false) {
         currentMenu->maxChildIndex = getMaxChildIndex(currentMenu);
         currentMenu->hasSetMaxChildren = true;
@@ -69,8 +77,14 @@ void updateButtonPress(int btn)
         visibleMenu = currentMenu;
       }
 
-      visibleMenu->processButton();
+      //menus don't need to always do something... can be just informative
+      if(visibleMenu->processButton != NULL) {
+        visibleMenu->processButton();
+      }
+
+      //they must always show something, however
       visibleMenu->showDisplay();
+      
     }
   }
 }
@@ -187,13 +201,13 @@ bool setupMenus()
     return false;
   }
 
-  menu = createMenu(menu, &child1ShowDisplay, &child1ProcessButton);
+  menu = createMenu(menu, &child1ShowDisplay, NULL);
   if (menu == NULL)
   {
     return false;
   }
 
-  menu = createMenu(menu->parent, &child2ShowDisplay, &child2ProcessButton);
+  menu = createMenu(menu->parent, &child2ShowDisplay, NULL);
   if (menu == NULL)
   {
     return false;
@@ -211,4 +225,5 @@ bool setupMenus()
 void freeMenus()
 {
   //need to walk the list from the root and free it!
+  //Though for our purposes, on Arduino, not really :P
 }

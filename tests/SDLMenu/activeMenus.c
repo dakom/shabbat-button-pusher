@@ -20,20 +20,12 @@ void child1ShowDisplay()
   showText("Child 1");
 }
 
-void child1ProcessButton()
-{
- 
-}
 
 void child2ShowDisplay()
 {
   showText("Child 2");
 }
 
-void child2ProcessButton()
-{
-  
-}
 
 void child3ShowDisplay()
 {
