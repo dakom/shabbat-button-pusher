@@ -7,6 +7,8 @@ MenuInfo menus[NUMBER_OF_MENUS];
 int currentButton = BTN_NONE - 1; //impossible value
 MenuInfo *currentMenu = NULL;
 MenuInfo *rootMenu = NULL;
+int horizontalIndex = 0;
+int verticalIndex = 0;
 
 void updateButtonPress(int btn)
 {
@@ -26,27 +28,29 @@ void updateButtonPress(int btn)
     switch (currentButton)
     {
     case BTN_UP:
-      currentMenu->verticalIndex++;
+      verticalIndex++;
       break;
     case BTN_LEFT:
-      currentMenu->horizontalIndex--;
+      horizontalIndex--;
       break;
     case BTN_RIGHT:
-      currentMenu->horizontalIndex++;
+      horizontalIndex++;
       break;
     case BTN_DOWN:
-      currentMenu->verticalIndex--;
+      verticalIndex--;
       break;
     }
 
-    if (currentMenu->verticalIndex < 0)
+    if (verticalIndex < 0)
     {
-      currentMenu->verticalIndex = 0;
+      verticalIndex = 0;
     }
-    if (currentMenu->horizontalIndex < 0)
+    if (horizontalIndex < 0)
     {
-      currentMenu->horizontalIndex = 0;
+      horizontalIndex = 0;
     }
+
+    
 
     if (currentMenu->maxChildIndex == -1)
     {
@@ -54,20 +58,29 @@ void updateButtonPress(int btn)
       currentMenu->maxChildIndex = getMaxChildIndex(currentMenu);
     }
 
-    if (currentMenu->horizontalIndex > currentMenu->maxChildIndex) {
-        currentMenu->horizontalIndex = currentMenu->maxChildIndex;
+    if (horizontalIndex > currentMenu->maxChildIndex) {
+        horizontalIndex = currentMenu->maxChildIndex;
     }
 
     MenuInfo *visibleMenu = getSelectedChild();
+
     if (visibleMenu == NULL)
     {
       visibleMenu = currentMenu;
     }
 
-    //menus don't need to always do something... can be just informative
-    if (visibleMenu->processButton != NULL)
-    {
-      visibleMenu->processButton();
+    int verticalMax = 0;
+
+    if(visibleMenu->getVerticalMax != NULL) {
+      verticalMax = visibleMenu->getVerticalMax();  
+    }
+
+    if(verticalIndex > verticalMax) {
+      verticalIndex = verticalMax;
+    }
+
+    if (currentButton == BTN_ENTER && visibleMenu->onAccept != NULL) {
+      visibleMenu->onAccept();
     }
 
     //they must always show something, however
@@ -100,7 +113,7 @@ MenuInfo *getSelectedChild()
   }
 
   MenuInfo *child = parent->firstChild;
-  for (int i = 0; i < currentMenu->horizontalIndex && child->nextSibling != NULL; i++)
+  for (int i = 0; i < horizontalIndex && child->nextSibling != NULL; i++)
   {
     child = child->nextSibling;
   }
@@ -128,20 +141,19 @@ char *buttonToString(int btn)
 void chooseMenu(MenuInfo *menu)
 {
   currentMenu = menu;
-  currentMenu->horizontalIndex = 0;
-  currentMenu->verticalIndex = 0;
+  horizontalIndex = 0;
+  verticalIndex = 0;
 }
 
-MenuInfo *createMenu(MenuInfo *parent, int index, void (*showDisplay)(), void (*processButton)())
+MenuInfo *createMenu(MenuInfo *parent, int index, void (*showDisplay)(), void (*onAccept)(), int (*getVerticalMax)())
 {
 
   MenuInfo *menu = &menus[index];
 
   menu->prevSibling = menu->nextSibling = menu->parent = menu->firstChild = NULL;
   menu->showDisplay = showDisplay;
-  menu->processButton = processButton;
-  menu->horizontalIndex = 0;
-  menu->verticalIndex = 0;
+  menu->onAccept = onAccept;
+  menu->getVerticalMax = getVerticalMax;
   menu->maxChildIndex = -1;
   
   if (parent != NULL)

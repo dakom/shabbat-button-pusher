@@ -13,16 +13,16 @@ void setupMenus()
   MenuInfo *menu;
   MenuInfo *parent;
   
-  parent = createMenu(NULL, index++, NULL, NULL);
-    parent = createMenu(parent, index++, &mainMenuShowDisplay, &mainMenuProcessButton);
-      createMenu(parent, index++, &mainChildStartMotorDisplay, NULL);
-      menu = createMenu(parent, index++, &mainChildDisplayTimeDisplay, &genericAcceptChildProcessButton);
-        createMenu(menu, index++, &displayTimeChildDisplay, NULL);
-        createMenu(menu, index++, &genericCancelDisplay, &genericCancelProcessButton);
+  parent = createMenu(NULL, index++, NULL, NULL, NULL);
+    parent = createMenu(parent, index++, &mainMenuShowDisplay, &mainMenuProcessButton, NULL);
+      createMenu(parent, index++, &mainChildStartMotorDisplay, NULL, NULL);
+      menu = createMenu(parent, index++, &mainChildDisplayTimeDisplay, &genericAcceptChildProcessButton, NULL);
+        createMenu(menu, index++, &displayTimeChildDisplay, NULL, NULL);
+        createMenu(menu, index++, &genericCancelDisplay, &genericCancelProcessButton, NULL);
 
-      createMenu(parent, index++, &mainChildSetTimeDisplay, NULL);
-      createMenu(parent, index++, &mainChildSetAlarmDisplay, NULL);
-      createMenu(parent, index++, &genericCancelDisplay, &genericCancelProcessButton);
+      createMenu(parent, index++, &mainChildSetTimeDisplay, NULL, NULL);
+      createMenu(parent, index++, &mainChildSetAlarmDisplay, NULL, NULL);
+      createMenu(parent, index++, &genericCancelDisplay, &genericCancelProcessButton, NULL);
 
   chooseMenu(&menus[0]);
 
