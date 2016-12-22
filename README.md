@@ -2,12 +2,12 @@
 
 ## TODO:
 
-* Set Time
-* Set Alarm
-* Test Alarm functionality
-* Move Alarm 1 to "Set AutoBot"
-* Hardcode Alarm 2 as Shabbos mode
-* Test Shabbos Mode
+* Fix current time (clear/hardcode?)
+* View time should be accurate
+* Resurrect manual motor capability
+* TODO's in readTime
+* TODO's in writeTime
+* TODO's in toggleShabbos
 * Build mount for motors (expand this as necessary)
 * Provide Fritzing Ref to github (optional)
 * Solve power problem to run off 1 pack (optional)
