@@ -1,55 +1,35 @@
-void genericCancelProcessButton();
+#ifndef ACTIVEMENUS_H
+#define ACTIVEMENUS_H
+#include <stdlib.h>
+#include <stdio.h>
+#include "menu.h"
+#include "timeHelpers.h"
+#include <SDL.h>
+
 void genericCancelDisplay();
+void genericCancelProcessButton();
 void genericAcceptChildProcessButton();
 void genericUpdateVisibleDisplay();
 
 void mainMenuShowDisplay();
 void mainMenuProcessButton();
+
 void mainChildStartMotorDisplay();
 void mainChildDisplayTimeDisplay();
 void mainChildSetTimeDisplay();
 void mainChildSetAlarmDisplay();
-void mainChildCancelDisplay();
+void mainChildToggleShabbosDisplay();
 
 void displayTimeChildDisplay();
+void displayTimeSlot();
+int getTimeStart();
+int getTimeMax();
+void displaySetTime();
+void changeTime();
 
-void displayTimeChildDisplay();
-void displayDayOfWeek();
-void displayDayOfMonth();
-void displayMonthOfYear();
-void displayYear();
-void displayHour();
-void displayMinute();
-void displaySecond();
+void toggleShabbosOnDisplay();
+void toggleShabbosOffDisplay();
+void changeShabbosOn();
+void changeShabbosOff();
 
-int getDayOfWeekStart();
-int getDayOfMonthStart();
-int getMonthOfYearStart();
-int getYearStart();
-int getHourStart();
-int getMinuteStart();
-int getSecondStart();
-
-int getDayOfWeekMax();
-int getDayOfMonthMax();
-int getMonthOfYearMax();
-int getYearMax();
-int getHourMax();
-int getMinuteMax();
-int getSecondMax();
-
-void displaySetDayOfWeek();
-void displaySetDayOfMonth();
-void displaySetMonthOfYear();
-void displaySetYear();
-void displaySetHour();
-void displaySetMinute();
-void displaySetSecond();
-
-void changeCurrentDayOfWeek();
-void changeCurrentDayOfMonth();
-void changeCurrentMonthOfYear();
-void changeCurrentYear();
-void changeCurrentHour();
-void changeCurrentMinute();
-void changeCurrentSecond();
+#endif

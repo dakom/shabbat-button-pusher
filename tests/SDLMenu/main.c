@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include "menu.h"
+#include "timeHelpers.h"
 
 #define FONT_SIZE 24
 
@@ -123,7 +124,7 @@ int main(int argc, char *args[])
         return 1;
     }
 
-    
+    setupTimes();
     setupMenus();
     
     //Load fonts... should probably error check but w/e

@@ -6,7 +6,7 @@
 MenuInfo menus[NUMBER_OF_MENUS];
 int currentButton = BTN_NONE - 1; //impossible value
 MenuInfo *currentMenu = NULL;
-MenuInfo *rootMenu = NULL;
+MenuInfo *visibleMenu = NULL;
 int horizontalIndex = 0;
 int verticalIndex = 0;
 
@@ -60,7 +60,7 @@ void updateButtonPress(int btn)
         horizontalIndex = currentMenu->maxChildIndex;
     }
 
-    MenuInfo *visibleMenu = getVisibleMenu();
+    setVisibleMenu();
 
     int verticalMax = 0;
 
@@ -86,15 +86,6 @@ void updateButtonPress(int btn)
   }
 }
 
-MenuInfo *getVisibleMenu() {
-  MenuInfo *visibleMenu = getSelectedChild();
-
-    if (visibleMenu == NULL)
-    {
-      visibleMenu = currentMenu;
-    }
-}
-
 int getMaxChildIndex(MenuInfo *parent)
 {
   int i = 0;
@@ -110,6 +101,15 @@ int getMaxChildIndex(MenuInfo *parent)
   return i;
 }
 
+void setVisibleMenu() {
+  visibleMenu = getSelectedChild();
+
+    if (visibleMenu == NULL)
+    {
+      visibleMenu = currentMenu;
+    }
+
+}
 MenuInfo *getSelectedChild()
 {
   MenuInfo *parent = currentMenu;
@@ -152,7 +152,8 @@ void chooseMenu(MenuInfo *menu)
 
   verticalIndex = 1;
 
-  MenuInfo *visibleMenu = getVisibleMenu();
+  setVisibleMenu();
+
   if(visibleMenu != NULL) {
     if(visibleMenu->getVerticalStart != NULL) {
       verticalIndex = visibleMenu->getVerticalStart();
@@ -161,7 +162,7 @@ void chooseMenu(MenuInfo *menu)
   
 }
 
-MenuInfo *createMenu(MenuInfo *parent, int index, void (*showDisplay)(), void (*onAccept)(), int (*getVerticalStart)(), int (*getVerticalMax)())
+MenuInfo *createMenu(MenuInfo *parent, int index, void (*showDisplay)(), void (*onAccept)(), int (*getVerticalStart)(), int (*getVerticalMax)(), TimeInfo *timeInfo)
 {
 
   MenuInfo *menu = &menus[index];
@@ -172,7 +173,8 @@ MenuInfo *createMenu(MenuInfo *parent, int index, void (*showDisplay)(), void (*
   menu->getVerticalStart = getVerticalStart;
   menu->getVerticalMax = getVerticalMax;
   menu->maxChildIndex = -1;
-  
+  menu->timeInfo = timeInfo;
+
   if (parent != NULL)
   {
     menu->parent = parent;

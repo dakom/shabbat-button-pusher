@@ -1,5 +1,5 @@
 #OBJS specifies which files to compile as part of the project
-OBJS = main.c menu.c activeMenus.c setupMenus.c
+OBJS = main.c menu.c activeMenus.c setupMenus.c timeHelpers.c
 
 #CC specifies which compiler we're using
 CC = g++
