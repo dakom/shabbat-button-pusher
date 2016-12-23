@@ -4,7 +4,7 @@
 
 * Fix current time (clear/hardcode?)
 * View time should be accurate
-* Resurrect manual motor capability
+* Resurrect manual motor capability (in setupMenus())
 * TODO's in readTime
 * TODO's in writeTime
 * TODO's in toggleShabbos

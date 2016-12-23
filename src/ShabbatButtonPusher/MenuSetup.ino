@@ -1,3 +1,7 @@
+/*
+ * I guess this is what happens when you're coding C, used to C#, and don't know C++ :) 
+ */
+ 
 #define ROOT\
   level[0] = createMenu(NULL, index++, NULL, NULL, NULL, NULL, NULL);
 
@@ -66,17 +70,17 @@ MenuInfo *createMenu(MenuInfo *parent, int index, void (*showDisplay)(), void (*
 
 /*
  * Called in main setup
- * I guess this is what happens when you're coding C, used to C#, and don't know C++ :) 
  */
  
 void setupMenus()
 {
   int index = 0;
-  MenuInfo *level[5]; //hardcode this to maximum depth
+  MenuInfo *level[5]; //if expanding menu deeper, adjust this
   
   ROOT
     PROCESS(0, &mainMenuShowDisplay, &genericSelectThroughAnyButton)
       DISPLAY(1, &mainChildStartMotorDisplay)
+      //TODO: add manual motor push here
       ACCEPT(1, &mainChildDisplayTimeDisplay)
         DISPLAY(2, &displayTimeChildDisplay)
       
