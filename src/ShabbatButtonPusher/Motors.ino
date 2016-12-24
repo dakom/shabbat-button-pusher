@@ -24,11 +24,15 @@ void updateMotorState() {
     case MOTOR_STATE_REVERSE:
       motors.servo.write(MOTOR_POSITION_ORIGIN);
       motors.state = MOTOR_STATE_NEUTRAL;
-       chooseMenu(&menus[0]);
+      chooseMenu(&menus[0]);
+      showText("Finished Pushing Button!");
+      delay(2000);
+      visibleMenu->showDisplay();
       //loop forever - for testing
       //motors.state = MOTOR_STATE_START;
       break;
     case MOTOR_STATE_START:
+      showText("Pushing Button...");
       motors.servo.write(MOTOR_POSITION_ORIGIN);
       motors.state = MOTOR_STATE_FORWARD;
       break;

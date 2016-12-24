@@ -162,7 +162,7 @@ void chooseMenu(MenuInfo *menu)
   
 }
 
-MenuInfo *createMenu(MenuInfo *parent, int index, void (*showDisplay)(), void (*onAccept)(), int (*getVerticalStart)(), int (*getVerticalMax)(), TimeInfo *timeInfo)
+MenuInfo *createMenu(MenuInfo *parent, int index, void (*showDisplay)(), void (*onAccept)(), int (*getVerticalStart)(), int (*getVerticalMax)(), int timeMode, int timeSlot)
 {
 
   MenuInfo *menu = &menus[index];
@@ -173,8 +173,9 @@ MenuInfo *createMenu(MenuInfo *parent, int index, void (*showDisplay)(), void (*
   menu->getVerticalStart = getVerticalStart;
   menu->getVerticalMax = getVerticalMax;
   menu->maxChildIndex = -1;
-  menu->timeInfo = timeInfo;
 
+  menu->timeMode = timeMode;
+  menu->timeSlot = timeSlot;
   if (parent != NULL)
   {
     menu->parent = parent;

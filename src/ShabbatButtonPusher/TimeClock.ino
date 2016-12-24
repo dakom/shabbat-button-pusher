@@ -1,21 +1,12 @@
 void setupTimes() {
     rtc.begin(PIN_CLOCK);
     rtc.autoTime();
-  
-    int mode, slot;
-    for(mode = 0; mode < TIME_MODE_ALARM; mode++) {
-        for(slot = 0; slot < TIME_SLOT_HOUR; slot++) {
-             timeInfos[mode][slot].slot = slot;
-            timeInfos[mode][slot].mode = mode;
-           
-        }
-    }
 }
 
-void readTime(TimeInfo *timeInfo) {
+void readTime(int mode) {
   rtc.update();
 
-  if(timeInfo->mode == TIME_MODE_CLOCK) {
+  if(mode == TIME_MODE_CLOCK) {
     timeBuffer[TIME_SLOT_DAY_OF_WEEK] = rtc.day();
     timeBuffer[TIME_SLOT_DAY_OF_MONTH] = rtc.date();
     timeBuffer[TIME_SLOT_MONTH] = rtc.month();
@@ -23,13 +14,21 @@ void readTime(TimeInfo *timeInfo) {
     timeBuffer[TIME_SLOT_SECOND] = rtc.second();
     timeBuffer[TIME_SLOT_MINUTE] = rtc.minute();
     timeBuffer[TIME_SLOT_HOUR] = rtc.hour();
+
+    log("DAY OF WEEK: %d %s", rtc.day(), rtc.dayStr());
   } else {
     //TODO: read from alarm setting
   }
 }
 
-void writeTime(TimeInfo *timeInfo) {
-  //TODO: Write time!
+void writeTime(int mode) {
+  if(mode == TIME_MODE_CLOCK) {
+    rtc.setTime(timeBuffer[TIME_SLOT_SECOND], timeBuffer[TIME_SLOT_MINUTE], timeBuffer[TIME_SLOT_HOUR],timeBuffer[TIME_SLOT_DAY_OF_WEEK], timeBuffer[TIME_SLOT_DAY_OF_MONTH], timeBuffer[TIME_SLOT_MONTH],  timeBuffer[TIME_SLOT_YEAR]);
+  } else {
+    //TODO: set alarm setting
+  }
+
+  //NOTE DAY OF WEEK = 7 WHEN IT'S SHABBOS DAY (SATURDAY)
 }
 
 

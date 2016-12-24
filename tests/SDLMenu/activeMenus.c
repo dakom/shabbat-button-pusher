@@ -90,17 +90,17 @@ void displayTimeChildDisplay()
 
 void displayTimeSlot() {
   
-  showText(slotToString(visibleMenu->timeInfo->slot));
+  showText(slotToString(visibleMenu->timeSlot));
 }
 
 int getTimeStart() {
 
-  readTime(visibleMenu->timeInfo);
-  return timeBuffer[visibleMenu->timeInfo->slot];
+  readTime(visibleMenu->timeMode);
+  return timeBuffer[visibleMenu->timeSlot];
 }
 
 int getTimeMax() {
-  switch(visibleMenu->timeInfo->slot) {
+  switch(visibleMenu->timeSlot) {
     case TIME_SLOT_DAY_OF_WEEK: return 7;
     case TIME_SLOT_DAY_OF_MONTH: return 31;
     case TIME_SLOT_MONTH: return 12;
@@ -112,13 +112,13 @@ int getTimeMax() {
 }
 
 void displaySetTime() {
-  showText("%s: %d", slotToString(visibleMenu->timeInfo->slot), verticalIndex);
+  showText("%s: %d", slotToString(visibleMenu->timeSlot), verticalIndex);
 }
 
 void changeTime() {
-  timeBuffer[visibleMenu->timeInfo->slot] = verticalIndex;
-  writeTime(visibleMenu->timeInfo);
-  showText("Changed %s!", slotToString(visibleMenu->timeInfo->slot));
+  timeBuffer[visibleMenu->timeSlot] = verticalIndex;
+  writeTime(visibleMenu->timeMode);
+  showText("Changed %s!", slotToString(visibleMenu->timeSlot));
   SDL_Delay(1000);
   chooseMenu(&menus[0]);
 }

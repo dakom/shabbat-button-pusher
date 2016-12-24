@@ -69,19 +69,13 @@ typedef struct MotorInfo {
 #define TIME_MODE_SHABBAT_TOGGLE 1
 #define TIME_MODE_ALARM 2
 
-
-typedef struct TimeInfo {
-  int slot;
-  int mode;
-};
-
 /*
  * MENU
  */
 
 #define showText(s) showFullDisplay(F(s), F(""))
 
-#define NUMBER_OF_MENUS 56 // change this number to real amount for optimization
+#define NUMBER_OF_MENUS 60 // change this number to real amount for optimization
 
 #define MENU_DELAY 3000
 
@@ -91,7 +85,8 @@ typedef struct MenuInfo{
   int (*getVerticalStart)();
   int (*getVerticalMax)(); 
   int maxChildIndex;
-  TimeInfo *timeInfo;
+  int timeMode;
+  int timeSlot;
   struct MenuInfo *nextSibling, *parent, *firstChild;
 };
 
@@ -119,8 +114,7 @@ LiquidCrystal lcd(PIN_LCD_1, PIN_LCD_2, PIN_LCD_3, PIN_LCD_4, PIN_LCD_5, PIN_LCD
 /*
  * Time
  */
-int timeBuffer[6];
-TimeInfo timeInfos[TIME_MODE_ALARM][TIME_SLOT_HOUR];
+int timeBuffer[TIME_SLOT_HOUR+1];
 
 /*
  * Motors
@@ -144,6 +138,6 @@ void setup()
 
 void loop()
 {
-  updateButtonPress();
+  updateMenu();
   updateMotorState();
 }

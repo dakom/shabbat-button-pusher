@@ -1,13 +1,18 @@
 /*
  * Called in main loop
  */
-void updateButtonPress()
+void updateMenu()
 {
   int btn = GetKey(analogRead(PIN_DISPLAY_BUTTON));
  
   if (currentButton != btn)
   {
     currentButton = btn;
+
+    if(btn == BTN_NONE) {
+      return;
+    }
+    log("NEW BUTTON: %d", btn);
     /*
        * Yeah, it's kinda ugly, but it works :)
        * We are really always showing and processing the active child, not really the active menu

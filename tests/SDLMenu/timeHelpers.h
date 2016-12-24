@@ -23,8 +23,8 @@ extern int timeBuffer[];
 extern TimeInfo timeInfos[TIME_MODE_ALARM][TIME_SLOT_HOUR];
 
 void setupTimes();
-void readTime(TimeInfo *);
-void writeTime(TimeInfo *);
+void readTime(int);
+void writeTime(int);
 char *slotToString(int);
 
 #endif

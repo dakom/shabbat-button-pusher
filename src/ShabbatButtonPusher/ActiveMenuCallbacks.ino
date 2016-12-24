@@ -1,6 +1,7 @@
 void changeMotorOn() {
   motors.state = MOTOR_STATE_START;
-  showText("Pushing Button...");
+  
+ 
 }
 
 void changeShabbosOn() {
@@ -28,17 +29,17 @@ void displayTimeChildDisplay()
 void displayTimeSlot() {
 
   //instead of showText because slotToString returns a String
-  showFullDisplay(slotToString(visibleMenu->timeInfo->slot), F(""));
+  showFullDisplay(slotToString(visibleMenu->timeSlot), F(""));
 }
 
 int getTimeStart() {
 
-  readTime(visibleMenu->timeInfo);
-  return timeBuffer[visibleMenu->timeInfo->slot];
+  readTime(visibleMenu->timeMode);
+  return timeBuffer[visibleMenu->timeSlot];
 }
 
 int getTimeMax() {
-  switch(visibleMenu->timeInfo->slot) {
+  switch(visibleMenu->timeSlot) {
     case TIME_SLOT_DAY_OF_WEEK: return 7;
     case TIME_SLOT_DAY_OF_MONTH: return 31;
     case TIME_SLOT_MONTH: return 12;
@@ -51,14 +52,14 @@ int getTimeMax() {
 
 void displaySetTime() {
   String val = GetFormattedString("%d", verticalIndex);
-  showFullDisplay(slotToString(visibleMenu->timeInfo->slot), val);
+  showFullDisplay(slotToString(visibleMenu->timeSlot), val);
   
 }
 
 void changeTime() {
-  timeBuffer[visibleMenu->timeInfo->slot] = verticalIndex;
-  writeTime(visibleMenu->timeInfo);
-  showFullDisplay(slotToString(visibleMenu->timeInfo->slot), F("Updated!"));
+  timeBuffer[visibleMenu->timeSlot] = verticalIndex;
+  writeTime(visibleMenu->timeMode);
+  showFullDisplay(slotToString(visibleMenu->timeSlot), F("Updated!"));
  
   delay(MENU_DELAY);
   chooseMenu(&menus[0]);

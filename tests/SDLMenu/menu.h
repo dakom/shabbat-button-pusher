@@ -19,7 +19,8 @@ typedef struct MenuInfo{
   int (*getVerticalStart)();
   int (*getVerticalMax)(); 
   int maxChildIndex;
-  TimeInfo *timeInfo;
+  int timeMode;
+  int timeSlot;
   struct MenuInfo *prevSibling, *nextSibling, *parent, *firstChild;
 };
 
@@ -32,7 +33,7 @@ extern MenuInfo menus[];
 void setVisibleMenu();
 int getMaxChildIndex(MenuInfo *);
 MenuInfo *getSelectedChild();
-MenuInfo *createMenu(MenuInfo *, int, void (*)(), void (*)(),  int (*)(), int (*)(), TimeInfo *);
+MenuInfo *createMenu(MenuInfo *, int, void (*)(), void (*)(),  int (*)(), int (*)(), int, int);
 void chooseMenu(MenuInfo *);
 void setupMenus();
 void updateButtonPress(int);

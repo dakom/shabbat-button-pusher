@@ -11,6 +11,10 @@ void log(char *fmt, ... ) {
   Serial.print('\n');
 }
 
+void logString(String str) {
+   Serial.print(str);
+  Serial.print('\n');
+}
 
 String GetFormattedString(char *fmt, ... ) {
   

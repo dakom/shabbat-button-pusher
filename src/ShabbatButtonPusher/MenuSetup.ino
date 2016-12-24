@@ -3,10 +3,10 @@
  */
  
 #define ROOT\
-  level[0] = createMenu(NULL, index++, NULL, NULL, NULL, NULL, NULL);
+  level[0] = createMenu(NULL, index++, NULL, NULL, NULL, NULL, -1, -1);
 
 #define PROCESS(l, d, p)\
-  level[l+1] = createMenu(level[l], index++, d, p, NULL,  NULL, NULL);
+  level[l+1] = createMenu(level[l], index++, d, p, NULL,  NULL,  -1, -1);
 
 #define DISPLAY(l, d)\
   PROCESS(l, d, NULL)
@@ -18,10 +18,10 @@
   PROCESS(l,  &genericCancelDisplay, &genericCancelProcessButton)
 
 #define TIME_SUBMENU(l, m, s)\
-  level[l+1] = createMenu(level[l], index++, &displayTimeSlot, &genericAcceptChildProcessButton, NULL,  NULL, &timeInfos[m][s]);\
-  level[l+2] = createMenu(level[l+1], index++, &displaySetTime, &changeTime, &getTimeStart,  &getTimeMax, &timeInfos[m][s]);\
-  level[l+2] = createMenu(level[l+1], index++, &genericCancelDisplay, &genericCancelProcessButton, NULL,  NULL, NULL);
-
+  level[l+1] = createMenu(level[l], index++, &displayTimeSlot, &genericAcceptChildProcessButton, NULL,  NULL, m, s);\
+  level[l+2] = createMenu(level[l+1], index++, &displaySetTime, &changeTime, &getTimeStart,  &getTimeMax, m, s);\
+  CANCEL(l+1)
+  
 #define TIME_MENU(l,m)\
   TIME_SUBMENU(l, m, TIME_SLOT_DAY_OF_WEEK)\
   TIME_SUBMENU(l, m, TIME_SLOT_DAY_OF_MONTH)\
@@ -31,9 +31,11 @@
   TIME_SUBMENU(l, m, TIME_SLOT_MINUTE)\
   TIME_SUBMENU(l, m, TIME_SLOT_SECOND)\
 
-#define START_ROOT() chooseMenu(&menus[0]); 
+#define START_ROOT()\
+  chooseMenu(&menus[0]);\
+  visibleMenu->showDisplay();
 
-MenuInfo *createMenu(MenuInfo *parent, int index, void (*showDisplay)(), void (*onAccept)(), int (*getVerticalStart)(), int (*getVerticalMax)(), TimeInfo *timeInfo)
+MenuInfo *createMenu(MenuInfo *parent, int index, void (*showDisplay)(), void (*onAccept)(), int (*getVerticalStart)(), int (*getVerticalMax)(), int timeMode, int timeSlot)
 {
 
   MenuInfo *menu = &menus[index];
@@ -44,7 +46,8 @@ MenuInfo *createMenu(MenuInfo *parent, int index, void (*showDisplay)(), void (*
   menu->getVerticalStart = getVerticalStart;
   menu->getVerticalMax = getVerticalMax;
   menu->maxChildIndex = -1;
-  menu->timeInfo = timeInfo;
+  menu->timeMode = timeMode;
+  menu->timeSlot = timeSlot;
 
   if (parent != NULL)
   {
@@ -79,8 +82,8 @@ void setupMenus()
   
   ROOT
     PROCESS(0, &mainMenuShowDisplay, &genericSelectThroughAnyButton)
-      DISPLAY(1, &mainChildStartMotorDisplay)
-      //TODO: add manual motor push here
+      ACCEPT(1, &mainChildStartMotorDisplay)
+        DISPLAY(2, &changeMotorOn)
       ACCEPT(1, &mainChildDisplayTimeDisplay)
         DISPLAY(2, &displayTimeChildDisplay)
       

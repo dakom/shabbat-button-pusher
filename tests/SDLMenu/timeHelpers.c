@@ -1,20 +1,11 @@
 #include "timeHelpers.h"
 
-int timeBuffer[6] = {1,1,1,1,1,1};
-
-TimeInfo timeInfos[TIME_MODE_ALARM][TIME_SLOT_HOUR];
+int timeBuffer[TIME_SLOT_HOUR+1] = {1,1,1,1,1,1};
 
 void setupTimes() {
-    int mode, slot;
-    for(mode = 0; mode < TIME_MODE_ALARM; mode++) {
-        for(slot = 0; slot < TIME_SLOT_HOUR; slot++) {
-             timeInfos[mode][slot].slot = slot;
-            timeInfos[mode][slot].mode = mode;
-           
-        }
-    }
+    
 }
-void readTime(TimeInfo *timeInfo) {
+void readTime(int mode) {
     //UPDATE TIME
     //SET TO REAL VALUES
     /*
@@ -28,7 +19,7 @@ void readTime(TimeInfo *timeInfo) {
 */
 }
 
-void writeTime(TimeInfo *timeInfo) {
+void writeTime(int mode) {
 
 }
 
