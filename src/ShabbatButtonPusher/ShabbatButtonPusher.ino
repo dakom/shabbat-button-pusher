@@ -66,7 +66,7 @@ typedef struct MotorInfo {
 #define TIME_SLOT_HOUR 6
 
 #define TIME_MODE_CLOCK 0
-#define TIME_MODE_SHABBAT_TOGGLE 1
+#define TIME_MODE_SHABBAT 1
 #define TIME_MODE_ALARM 2
 
 /*
@@ -115,6 +115,8 @@ LiquidCrystal lcd(PIN_LCD_1, PIN_LCD_2, PIN_LCD_3, PIN_LCD_4, PIN_LCD_5, PIN_LCD
  * Time
  */
 int timeBuffer[TIME_SLOT_HOUR+1];
+int manualAlarm[TIME_SLOT_HOUR+1];
+bool shabbosAlarmActive;
 
 /*
  * Motors
@@ -138,6 +140,8 @@ void setup()
 
 void loop()
 {
-  updateMenu();
+  updateTime();
+    updateMenu();
   updateMotorState();
+  
 }

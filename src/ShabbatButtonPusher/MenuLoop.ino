@@ -12,7 +12,7 @@ void updateMenu()
     if(btn == BTN_NONE) {
       return;
     }
-    log("NEW BUTTON: %d", btn);
+    //log("NEW BUTTON: %d", btn);
     /*
        * Yeah, it's kinda ugly, but it works :)
        * We are really always showing and processing the active child, not really the active menu

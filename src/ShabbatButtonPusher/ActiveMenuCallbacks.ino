@@ -1,26 +1,23 @@
 void changeMotorOn() {
   motors.state = MOTOR_STATE_START;
-  
- 
 }
 
 void changeShabbosOn() {
   showText("Changed Shabbos On!");
-   //TODO: SET ALARM
+  shabbosAlarmActive = true;
   delay(MENU_DELAY);
   chooseMenu(&menus[0]);
 }
 
 void changeShabbosOff() {
   showText("Changed Shabbos Off!");
-  //TODO: Delete Alarm
+  shabbosAlarmActive = false;
   delay(MENU_DELAY);
   chooseMenu(&menus[0]);
 }
 
 void displayTimeChildDisplay()
 {
-  readTime(TIME_MODE_CLOCK);
   showFullDisplay(GetCurrentDateString(), GetCurrentTimeString());
   delay(MENU_DELAY);
   chooseMenu(&menus[0]);
@@ -34,7 +31,6 @@ void displayTimeSlot() {
 
 int getTimeStart() {
 
-  readTime(visibleMenu->timeMode);
   return timeBuffer[visibleMenu->timeSlot];
 }
 
