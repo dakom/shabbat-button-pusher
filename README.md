@@ -1,5 +1,7 @@
 # shabbat-pushbutton
 
+Video demo: https://www.youtube.com/watch?v=IJEl0PeK9OM
+
 ## TODO:
 * Test Shabbos mode (should work fine)
 * Build mount for motors (expand this as necessary)
